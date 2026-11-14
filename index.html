@@ -92,6 +92,55 @@ function render(){
        }
       }
      }
+    }else if(scenario===0 && path[1]==='channel2'){
+     const ru=language==='ru';
+     const a=(r,l)=>ru?r:l;
+     c.append(step('03',x.channelReplies[2],[
+      [a('В соцсети или мессенджер','Sociālajos tīklos vai ziņapmaiņā'),'ad0'],
+      [a('На страницу с информацией','Uz informācijas lapu'),'ad1'],
+      [a('Звонят напрямую','Zvans pa tālruni'),'ad2'],
+      [a('Не хочу обсуждать','Nevēlos apspriest'),'adStop']
+     ],2));
+     if(path[2]){
+      const d=branch(c);
+      if(path[2]==='adStop')d.append(step(x.finish,a('Хорошо, не буду отвлекать. Спасибо за ваше время!','Labi, netraucēšu. Paldies par jūsu laiku!'),[],3));
+      else {
+       const lines={
+        ad0:a('Хорошо, услышал вас. Сайт может дополнить рекламу: услуги, цены и контакты будут в одном месте. Хотели бы посмотреть пару примеров?','Labi, paldies. Mājaslapa var papildināt reklāmu: pakalpojumi, cenas un kontakti būs vienuviet. Vai vēlaties apskatīt pāris piemērus?'),
+        ad1:a('Хорошо. Актуально ли вам сделать страницу после рекламы удобнее для клиентов? Могу показать пару примеров.','Skaidrs. Vai būtu aktuāli padarīt lapu pēc reklāmas ērtāku klientiem? Varu parādīt pāris piemērus.'),
+        ad2:a('Понял вас. Сайт мог бы заранее отвечать на частые вопросы, чтобы звонящие уже знали об услугах. Хотели бы посмотреть примеры?','Skaidrs. Mājaslapa varētu atbildēt uz biežākajiem jautājumiem vēl pirms zvana. Vai vēlaties apskatīt piemērus?')
+       };
+       d.append(step('04',lines[path[2]],[
+        [a('Да, интересно','Jā, interesē'),'adYes'],
+        [a('Не вижу необходимости','Neredzu vajadzību'),'adNo'],
+        [a('Может быть позже','Varbūt vēlāk'),'adLater'],
+        [a('Неинтересно, не звоните','Neinteresē, vairs nezvaniet'),'adStop']
+       ],3));
+       if(path[3]){
+        const e=branch(d),v=path[3];
+        if(v==='adStop')e.append(step(x.finish,a('Хорошо, больше беспокоить не будем. Всего доброго!','Labi, vairs netraucēsim. Visu labu!'),[],4));
+        else if(v==='adYes')e.append(step('05',x.selfContactText,x.delivery.map((q,i)=>[q,'delivery'+i]),4));
+        else if(v==='adNo')e.append(step('05',a('Хорошо, услышал вас. Подскажите, что именно не кажется полезным? Если не хотите обсуждать, не буду настаивать.','Labi, sadzirdēju jūs. Kas tieši nešķiet noderīgs? Ja nevēlaties apspriest, neuzstāšu.'),[
+         [a('Уже всё устроено','Viss jau ir sakārtots'),'no0'],
+         [a('Клиентов хватает','Klientu pietiek'),'no1'],
+         [a('Не хочу обсуждать','Nevēlos apspriest'),'noStop']
+        ],4));
+        else e.append(step('05',a('Хорошо. Сайт в принципе не нужен или просто сейчас не время?','Skaidrs. Mājaslapa vispār nav vajadzīga vai vienkārši šobrīd nav īstais laiks?'),[
+         [a('Не нужен','Nav vajadzīga'),'laterNo'],
+         [a('Сейчас не время','Šobrīd nav īstais laiks'),'laterTime'],
+         [a('Не хочу обсуждать','Nevēlos apspriest'),'laterStop']
+        ],4));
+        if(path[4]){
+         const f=branch(e),v2=path[4];
+         if(v==='adYes'&&v2.startsWith('delivery'))f.append(step(x.finish,x.deliveryEnd[Number(v2.slice(8))],[],5));
+         else if(v2==='laterTime')f.append(step('06',a('Могу один раз отправить SMS с примерами, чтобы вы посмотрели, когда будет удобно. Разрешаете?','Vai drīkstu vienreiz nosūtīt SMS ar piemēriem, lai varat apskatīt vēlāk?'),[[a('Да, разрешаю','Jā, drīkst'),'permit'],[a('Нет, спасибо','Nē, paldies'),'stop']],5));
+         else if(v2==='no0'||v2==='no1')f.append(step(x.finish,a('Спасибо за ответ. Не буду настаивать, хорошего дня!','Paldies par atbildi. Neuzstāšu, lai jauka diena!'),[],5));
+         else f.append(step(x.finish,a('Хорошо, спасибо за разговор. Всего доброго!','Labi, paldies par sarunu. Visu labu!'),[],5));
+         if(path[5]&&v2==='laterTime'){const g=branch(f);g.append(step(x.finish,path[5]==='permit'?x.recommendSms:x.declineText,[],6))}
+        }
+       }
+      }
+     }
     }else if(scenario===0 && path[1]==='channel3'){
      const isRu=language==='ru';
      c.append(step('03',x.channelReplies[3],(isRu?['По знакомым','Проходят мимо','Другим способом','Не хочу обсуждать']:['No paziņām','Ejot garām','Citādi','Nevēlos apspriest']).map((v,i)=>[v,'source'+i]),2));
