@@ -61,7 +61,7 @@ function render(){
         e.append(step('05',line+' '+x.socialExamples,x.socialExamplesOptions.map((v,i)=>[v,'answer'+i]),4));
        }else if(path[3]==='answer0')e.append(step('05',x.selfContactText,x.delivery.map((v,i)=>[v,'delivery'+i]),4));
        else if(path[3]==='answer1')e.append(step(x.finish,x.declineText,[],4));
-       else e.append(step('05',x.socialLater,x.recommendLaterChoices.map((v,i)=>[v,'reason'+i]),4));
+       else e.append(step(x.finish,x.declineText,[],4));
        const level=path[3].startsWith('detail')?4:3;
        if(level===3 && path[4]){
         const f=branch(e),v=path[4];
@@ -75,7 +75,7 @@ function render(){
         const f=branch(e),answer=path[level];
         if(answer==='answer0')f.append(step('06',x.selfContactText,x.delivery.map((v,i)=>[v,'delivery'+i]),level+1));
         else if(answer==='answer1')f.append(step(x.finish,x.declineText,[],level+1));
-        else if(answer==='answer2')f.append(step('06',x.socialLater,x.recommendLaterChoices.map((v,i)=>[v,'reason'+i]),level+1));
+        else if(answer==='answer2')f.append(step(x.finish,x.declineText,[],level+1));
         else if(answer.startsWith('reason'))f.append(step('06',answer==='reason0'?x.needReplies[0]:x.recommendNotNow,answer==='reason1'?x.recommendPermission.map((v,i)=>[v,'permit'+i]):x.needChoices.map((v,i)=>[v,'need'+i]),level+1));
         else if(answer.startsWith('delivery'))f.append(step(x.finish,x.deliveryEnd[Number(answer.slice(8))],[],level+1));
         else if(answer==='stop')f.append(step(x.finish,x.declineText,[],level+1));
