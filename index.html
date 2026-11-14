@@ -5,7 +5,7 @@ const app=document.getElementById('app');
 const notesField=document.getElementById('call-notes-text');
 try{notesField.value=localStorage.getItem('lomenti-call-notes')||''}catch(e){}
 notesField.addEventListener('input',()=>{try{localStorage.setItem('lomenti-call-notes',notesField.value)}catch(e){}});
-document.getElementById('notes-clear').onclick=()=>{if(confirm(language==='ru'?'Очистить заметки?':'Vai dzēst piezīmes?')){notesField.value='';try{localStorage.removeItem('lomenti-call-notes')}catch(e){}}};
+document.getElementById('notes-clear').onclick=()=>{notesField.value='';try{localStorage.removeItem('lomenti-call-notes')}catch(e){}};
 const notesBox=document.querySelector('.call-notes');const notesToggle=document.getElementById('notes-toggle');
 notesToggle.onclick=()=>{notesBox.classList.toggle('collapsed');const expanded=!notesBox.classList.contains('collapsed');notesToggle.setAttribute('aria-expanded',String(expanded));notesToggle.textContent=language==='ru'?(expanded?'Свернуть':'Развернуть'):(expanded?'Sakļaut':'Izvērst');restoreNotesPosition()};
 const notesHead=document.querySelector('.notes-head');
