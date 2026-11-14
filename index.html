@@ -50,7 +50,7 @@ function render(){
         const f=branch(e),v=path[4];
         if(v.startsWith('need'))f.append(step(x.finish,v==='need2'?x.declineText:x.needReplies[Number(v.slice(4))],v==='need2'?[]:[[x.socialExamplesOptions[0],'offerAgain'],[x.decline,'stop']],5));
         else if(v.startsWith('delivery'))f.append(step(x.finish,x.deliveryEnd[Number(v.slice(8))],[],5));
-        else if(v.startsWith('reason'))f.append(step('06',v==='reason0'?x.socialNoNeed:x.recommendNotNow,v==='reason0'?x.needChoices.map((q,i)=>[q,'need'+i]):x.recommendPermission.map((q,i)=>[q,'permit'+i]),5));
+        else if(v.startsWith('reason'))f.append(step('06',v==='reason0'?x.needReplies[0]:x.recommendNotNow,v==='reason0'?x.needChoices.map((q,i)=>[q,'need'+i]):x.recommendPermission.map((q,i)=>[q,'permit'+i]),5));
         else if(v==='stop')f.append(step(x.finish,x.declineText,[],5));
         if(path[5]){const g=branch(f),v2=path[5];if(v2==='offerAgain')g.append(step('07',x.selfContactText,x.delivery.map((q,i)=>[q,'delivery'+i]),6));else if(v2.startsWith('need'))g.append(step(x.finish,v2==='need2'?x.declineText:x.needReplies[Number(v2.slice(4))],v2==='need2'?[]:[[x.socialExamplesOptions[0],'offerAgain'],[x.decline,'stop']],6));else if(v2==='permit0')g.append(step(x.finish,x.recommendSms,[],6));else g.append(step(x.finish,x.declineText,[],6));if(path[6]){const h=branch(g);h.append(step(x.finish,path[6].startsWith('delivery')?x.deliveryEnd[Number(path[6].slice(8))]:path[6]==='offerAgain'?x.selfContactText:x.declineText,path[6]==='offerAgain'?x.delivery.map((q,i)=>[q,'delivery'+i]):[],7))}}
        }
@@ -59,7 +59,7 @@ function render(){
         if(answer==='answer0')f.append(step('06',x.selfContactText,x.delivery.map((v,i)=>[v,'delivery'+i]),level+1));
         else if(answer==='answer1')f.append(step('06',x.socialNoNeed,x.needChoices.map((v,i)=>[v,'need'+i]),level+1));
         else if(answer==='answer2')f.append(step('06',x.socialLater,x.recommendLaterChoices.map((v,i)=>[v,'reason'+i]),level+1));
-        else if(answer.startsWith('reason'))f.append(step('06',answer==='reason0'?x.socialNoNeed:x.recommendNotNow,answer==='reason1'?x.recommendPermission.map((v,i)=>[v,'permit'+i]):x.needChoices.map((v,i)=>[v,'need'+i]),level+1));
+        else if(answer.startsWith('reason'))f.append(step('06',answer==='reason0'?x.needReplies[0]:x.recommendNotNow,answer==='reason1'?x.recommendPermission.map((v,i)=>[v,'permit'+i]):x.needChoices.map((v,i)=>[v,'need'+i]),level+1));
         else if(answer.startsWith('delivery'))f.append(step(x.finish,x.deliveryEnd[Number(answer.slice(8))],[],level+1));
         else if(answer==='stop')f.append(step(x.finish,x.declineText,[],level+1));
         if(path[level+1]){const g=branch(f),v=path[level+1];if(v.startsWith('delivery'))g.append(step(x.finish,x.deliveryEnd[Number(v.slice(8))],[],level+2));else if(v.startsWith('reason'))g.append(step('07',v==='reason0'?x.socialNoNeed:x.recommendNotNow,v==='reason1'?x.recommendPermission.map((q,i)=>[q,'permit'+i]):x.needChoices.map((q,i)=>[q,'need'+i]),level+2));else if(v==='permit0')g.append(step(x.finish,x.recommendSms,[],level+2));else g.append(step(x.finish,x.declineText,[],level+2));if(path[level+2]){const h=branch(g);h.append(step(x.finish,path[level+2]==='permit0'?x.recommendSms:x.declineText,[],level+3))}}
