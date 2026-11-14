@@ -46,7 +46,15 @@ function render(){
        else if(path[3]==='answer1')e.append(step('05',x.socialNoNeed,x.needChoices.map((v,i)=>[v,'need'+i]),4));
        else e.append(step('05',x.socialLater,x.recommendLaterChoices.map((v,i)=>[v,'reason'+i]),4));
        const level=path[3].startsWith('detail')?4:3;
-       if(path[level]){
+       if(level===3 && path[4]){
+        const f=branch(e),v=path[4];
+        if(v.startsWith('need'))f.append(step(x.finish,v==='need2'?x.declineText:x.needReplies[Number(v.slice(4))],v==='need2'?[]:[[x.socialExamplesOptions[0],'offerAgain'],[x.decline,'stop']],5));
+        else if(v.startsWith('delivery'))f.append(step(x.finish,x.deliveryEnd[Number(v.slice(8))],[],5));
+        else if(v.startsWith('reason'))f.append(step('06',v==='reason0'?x.socialNoNeed:x.recommendNotNow,v==='reason0'?x.needChoices.map((q,i)=>[q,'need'+i]):x.recommendPermission.map((q,i)=>[q,'permit'+i]),5));
+        else if(v==='stop')f.append(step(x.finish,x.declineText,[],5));
+        if(path[5]){const g=branch(f),v2=path[5];if(v2==='offerAgain')g.append(step('07',x.selfContactText,x.delivery.map((q,i)=>[q,'delivery'+i]),6));else if(v2.startsWith('need'))g.append(step(x.finish,v2==='need2'?x.declineText:x.needReplies[Number(v2.slice(4))],v2==='need2'?[]:[[x.socialExamplesOptions[0],'offerAgain'],[x.decline,'stop']],6));else if(v2==='permit0')g.append(step(x.finish,x.recommendSms,[],6));else g.append(step(x.finish,x.declineText,[],6));if(path[6]){const h=branch(g);h.append(step(x.finish,path[6].startsWith('delivery')?x.deliveryEnd[Number(path[6].slice(8))]:path[6]==='offerAgain'?x.selfContactText:x.declineText,path[6]==='offerAgain'?x.delivery.map((q,i)=>[q,'delivery'+i]):[],7))}}
+       }
+       if(level===4 && path[level]){
         const f=branch(e),answer=path[level];
         if(answer==='answer0')f.append(step('06',x.selfContactText,x.delivery.map((v,i)=>[v,'delivery'+i]),level+1));
         else if(answer==='answer1')f.append(step('06',x.socialNoNeed,x.needChoices.map((v,i)=>[v,'need'+i]),level+1));
