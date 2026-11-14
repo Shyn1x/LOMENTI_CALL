@@ -171,6 +171,65 @@ function render(){
        }
       }
      }
+    }else if(scenario===1){
+     const ru=language==='ru',a=(r,l)=>ru?r:l;
+     const stop=a('Спасибо за ответ. Не буду отвлекать. Хорошего дня!','Paldies par atbildi. Netraucēšu. Lai jauka diena!');
+     c.append(step('03',a('Подскажите, вас всё устраивает в работе сайта или есть что-то, что хотелось бы улучшить?','Sakiet, lūdzu, vai pašreizējā mājaslapa jūs apmierina, vai tomēr kaut ko vēlētos uzlabot?'),[
+      [a('Всё устраивает','Viss apmierina'),'fine'],[a('Есть что улучшить','Ir ko uzlabot'),'improve'],[a('Не задумывались','Neesam domājuši'),'unsure'],[x.decline,'stop']
+     ],2));
+     if(path[2]){
+      const d=branch(c),v=path[2];
+      if(v==='fine'||v==='stop')d.append(step(x.finish,stop,[],3));
+      else {
+       const improving=v==='improve';
+       d.append(step('04',improving?a('Что именно хотелось бы улучшить?','Ko tieši vēlētos uzlabot?'):a('Какую задачу сайт сейчас выполняет: рассказывает об услугах, принимает заявки или что-то другое?','Kādu uzdevumu mājaslapa šobrīd pilda: informē par pakalpojumiem, pieņem pieteikumus vai ko citu?'),improving?[
+        [a('Внешний вид','Izskats'),'look'],[a('Удобство','Lietošanas ērtums'),'usability'],[a('Функции','Funkcijas'),'features'],[x.decline,'stop']
+       ]:[
+        [a('Рассказывает об услугах','Informē par pakalpojumiem'),'info'],[a('Принимает заявки','Pieņem pieteikumus'),'leads'],[a('Другое','Cits'),'other'],[x.decline,'stop']
+       ],3));
+       if(path[3]){
+        const e=branch(d),w=path[3];
+        if(w==='stop')e.append(step(x.finish,stop,[],4));
+        else {
+         const questions={
+          look:a('Что важнее изменить: оформление или отображение на телефоне?','Ko svarīgāk mainīt: dizainu vai attēlojumu telefonā?'),
+          usability:a('Где клиентам сложнее всего: найти информацию, связаться или оставить заявку?','Kas klientiem ir grūtāk: atrast informāciju, sazināties vai nosūtīt pieteikumu?'),
+          features:a('Какой функции не хватает: записи, формы заявки или ответов на частые вопросы?','Kā pietrūkst: pieraksta, pieteikuma formas vai atbilžu uz biežiem jautājumiem?'),
+          info:a('Удобно ли клиентам находить услуги и контакты?','Vai klientiem ir ērti atrast pakalpojumus un kontaktus?'),
+          leads:a('Удобно ли клиентам оставлять заявки с телефона?','Vai klientiem ir ērti nosūtīt pieteikumus no telefona?'),
+          other:a('А что для вас самое важное в работе сайта?','Kas jums mājaslapas darbībā ir vissvarīgākais?')
+         };
+         e.append(step('05',questions[w],[[a('Есть сложности','Ir grūtības'),'problem'],[a('Всё работает хорошо','Viss darbojas labi'),'fine'],[a('Не хочу обсуждать','Nevēlos apspriest'),'stop']],4));
+         if(path[4]){
+          const g=branch(e),z=path[4];
+          if(z!=='problem')g.append(step(x.finish,stop,[],5));
+          else {
+           g.append(step('06',a('Спасибо, теперь понятнее. Мы можем оценить ваш сайт и предложить улучшения под эту задачу. Хотели бы получить пример похожей работы?','Paldies, tagad ir skaidrāk. Varam izvērtēt jūsu mājaslapu un piedāvāt uzlabojumus šim uzdevumam. Vai vēlaties saņemt līdzīga darba piemēru?'),[
+            [a('Да, интересно','Jā, interesē'),'yes'],[a('Дорого','Par dārgu'),'expensive'],[a('У нас есть разработчик','Mums ir izstrādātājs'),'developer'],[a('Сейчас не время','Šobrīd nav īstais laiks'),'later'],[x.decline,'stop']
+           ],5));
+           if(path[5]){
+            const h=branch(g),q=path[5];
+            if(q==='yes')h.append(step('07',x.selfContactText,x.delivery.map((v,i)=>[v,'delivery'+i]),6));
+            else if(q==='expensive')h.append(step('07',a('Вы уже рассматривали бюджет на улучшение сайта или пока изучаете варианты?','Vai jau esat apsvēruši budžetu mājaslapas uzlabošanai vai pagaidām tikai izskatāt iespējas?'),[[a('Есть бюджет','Ir budžets'),'budget'],[a('Пока изучаем','Pagaidām pētām'),'explore'],[x.decline,'stop']],6));
+            else if(q==='developer')h.append(step('07',a('Хорошо, что есть специалист. Все необходимые изменения сейчас удаётся реализовывать?','Labi, ka jums ir speciālists. Vai visas nepieciešamās izmaiņas izdodas īstenot?'),[[a('Да, всё хорошо','Jā, viss kārtībā'),'fine'],[a('Не всё','Ne visu'),'gap'],[x.decline,'stop']],6));
+            else h.append(step(x.finish,stop,[],6));
+            if(path[6]){
+             const j=branch(h),u=path[6];
+             if(q==='yes'&&u.startsWith('delivery'))j.append(step(x.finish,x.deliveryEnd[Number(u.slice(8))],[],7));
+             else if(u==='budget'||u==='explore'||u==='gap')j.append(step('08',a('Спасибо. Можем сначала оценить задачу и прислать информацию без обязательств. Хотите?','Paldies. Varam vispirms izvērtēt uzdevumu un nosūtīt informāciju bez saistībām. Vai vēlaties?'),[[x.send,'send'],[x.decline,'stop']],7));
+             else j.append(step(x.finish,stop,[],7));
+             if(path[7]&&(u==='budget'||u==='explore'||u==='gap')){
+              const k=branch(j);k.append(step(path[7]==='send'?'09':x.finish,path[7]==='send'?x.selfContactText:stop,path[7]==='send'?x.delivery.map((v,i)=>[v,'delivery'+i]):[],8));
+              if(path[8]&&path[7]==='send'){const m=branch(k);m.append(step(x.finish,x.deliveryEnd[Number(path[8].slice(8))],[],9))}
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
     }else if(path[1]==='decline')c.append(step(x.finish,x.declineText,[],2));
     else{
      c.append(step('03',x.pricing,[[x.send,'send'],[x.later,'later'],[x.decline,'decline']],2));
