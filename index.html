@@ -94,7 +94,7 @@ function render(){
        const offer=(parent,level,choice)=>{
         if(choice==='offer2'||choice==='decline'){parent.append(step(x.finish,x.declineText,[],level));return}
         if(choice==='offer0'){parent.append(step(x.finish,x.selfContactText,x.delivery.map((v,i)=>[v,'delivery'+i]),level));return}
-        if(choice==='offer1'){parent.append(step('05',x.recommendLater,x.recommendLaterChoices.map((v,i)=>[v,'reason'+i]),level));return}
+        if(choice==='offer1'){parent.append(step(x.finish,language==='ru'?'Понимаю, сейчас не время. Спасибо за разговор, хорошего дня!':'Saprotu, šobrīd nav īstais brīdis. Paldies par sarunu, lai jauka diena!',[],level));return}
        };
        if(path[3]){
         const e=branch(d);
