@@ -249,6 +249,62 @@ function render(){
        }
       }
      }
+    }else if(scenario===2){
+     const ru=language==='ru',a=(r,l)=>ru?r:l;
+     const bye=a('Спасибо за разговор! Не буду отвлекать. Хорошего дня!','Paldies par sarunu! Netraucēšu. Lai jauka diena!');
+     c.append(step('03',a('Что сейчас больше всего мешает вашему сайту?','Kas šobrīd visvairāk traucē jūsu mājaslapai?'),[
+      [a('Устаревший дизайн','Novecojis dizains'),'design'],
+      [a('Неудобно с телефона','Neērti telefonā'),'mobile'],
+      [a('Мало заявок','Maz pieteikumu'),'leads'],
+      [a('Сложно обновлять','Grūti atjaunot'),'updates'],
+      [a('Не знаю точно','Nezinu precīzi'),'unknown'],
+      [x.decline,'stop']
+     ],2));
+     if(path[2]){
+      const d=branch(c),v=path[2];
+      if(v==='stop')d.append(step(x.finish,bye,[],3));
+      else {
+       const prompts={
+        design:a('Что хотелось бы изменить в первую очередь: внешний вид или структуру страниц?','Ko vispirms vēlētos mainīt: izskatu vai lapu struktūru?'),
+        mobile:a('Что неудобнее всего на телефоне: читать информацию, искать контакты или отправлять заявку?','Kas telefonā ir visneērtāk: lasīt informāciju, atrast kontaktus vai nosūtīt pieteikumu?'),
+        leads:a('Клиенты чаще звонят или оставляют заявки через сайт?','Vai klienti biežāk zvana vai piesakās mājaslapā?'),
+        updates:a('Что сложнее обновлять: цены, услуги или фотографии?','Ko ir grūtāk atjaunot: cenas, pakalpojumus vai fotoattēlus?'),
+        unknown:a('Можем начать с короткого обзора сайта без обязательств. Это было бы полезно?','Varam sākt ar īsu mājaslapas apskatu bez saistībām. Vai tas būtu noderīgi?')
+       };
+       d.append(step('04',prompts[v],[
+        [a('Да, обсудим','Jā, apspriedīsim'),'discuss'],
+        [a('Пока не актуально','Pagaidām nav aktuāli'),'later'],
+        [x.decline,'stop']
+       ],3));
+       if(path[3]){
+        const e=branch(d);
+        if(path[3]!=='discuss')e.append(step(x.finish,bye,[],4));
+        else {
+         e.append(step('05',a('Понял. Можем предложить улучшение именно этой части сайта. Хотите, чтобы мы прислали примеры и предварительный вариант решения?','Sapratu. Varam piedāvāt uzlabot tieši šo mājaslapas daļu. Vai vēlaties saņemt piemērus un sākotnējo risinājumu?'),[
+          [a('Да, отправьте','Jā, atsūtiet'),'yes'],
+          [a('Сколько стоит?','Cik maksā?'),'price'],
+          [a('Есть свой разработчик','Ir savs izstrādātājs'),'developer'],
+          [x.decline,'stop']
+         ],4));
+         if(path[4]){
+          const f=branch(e),w=path[4];
+          if(w==='yes')f.append(step('06',x.selfContactText,x.delivery.map((v,i)=>[v,'delivery'+i]),5));
+          else if(w==='price'||w==='developer')f.append(step('06',w==='price'?a('Стоимость зависит от объёма: можно начать с одной конкретной доработки. Сначала оценим задачу, без обязательств. Отправить примеры?','Cena ir atkarīga no darba apjoma: var sākt ar vienu konkrētu uzlabojumu. Vispirms izvērtēsim uzdevumu bez saistībām. Vai nosūtīt piemērus?'):a('Отлично. Не предлагаем заменять вашего разработчика. При необходимости можем помочь с отдельной задачей. Отправить примеры?','Lieliski. Mēs nepiedāvājam aizstāt jūsu izstrādātāju. Vajadzības gadījumā varam palīdzēt ar atsevišķu uzdevumu. Vai nosūtīt piemērus?'),[[x.send,'send'],[x.decline,'stop']],5));
+          else f.append(step(x.finish,bye,[],5));
+          if(path[5]){
+           const g=branch(f);
+           if(w==='yes'&&path[5].startsWith('delivery'))g.append(step(x.finish,x.deliveryEnd[Number(path[5].slice(8))],[],6));
+           else if(path[5]==='send')g.append(step('07',x.selfContactText,x.delivery.map((v,i)=>[v,'delivery'+i]),6));
+           else g.append(step(x.finish,bye,[],6));
+           if(path[6]&&path[5]==='send'&&path[6].startsWith('delivery')){
+            const h=branch(g);h.append(step(x.finish,x.deliveryEnd[Number(path[6].slice(8))],[],7));
+           }
+          }
+         }
+        }
+       }
+      }
+     }
     }else if(path[1]==='decline')c.append(step(x.finish,x.declineText,[],2));
     else{
      c.append(step('03',x.pricing,[[x.send,'send'],[x.later,'later'],[x.decline,'decline']],2));
