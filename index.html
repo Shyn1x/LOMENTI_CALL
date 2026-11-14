@@ -120,11 +120,7 @@ function render(){
         const e=branch(d),v=path[3];
         if(v==='adStop')e.append(step(x.finish,a('Хорошо, больше беспокоить не будем. Всего доброго!','Labi, vairs netraucēsim. Visu labu!'),[],4));
         else if(v==='adYes')e.append(step('05',x.selfContactText,x.delivery.map((q,i)=>[q,'delivery'+i]),4));
-        else if(v==='adNo')e.append(step('05',a('Хорошо, услышал вас. Подскажите, что именно не кажется полезным? Если не хотите обсуждать, не буду настаивать.','Labi, sadzirdēju jūs. Kas tieši nešķiet noderīgs? Ja nevēlaties apspriest, neuzstāšu.'),[
-         [a('Уже всё устроено','Viss jau ir sakārtots'),'no0'],
-         [a('Клиентов хватает','Klientu pietiek'),'no1'],
-         [a('Не хочу обсуждать','Nevēlos apspriest'),'noStop']
-        ],4));
+        else if(v==='adNo')e.append(step(x.finish,x.declineText,[],4));
         else e.append(step('05',a('Хорошо. Сайт в принципе не нужен или просто сейчас не время?','Skaidrs. Mājaslapa vispār nav vajadzīga vai vienkārši šobrīd nav īstais laiks?'),[
          [a('Не нужен','Nav vajadzīga'),'laterNo'],
          [a('Сейчас не время','Šobrīd nav īstais laiks'),'laterTime'],
