@@ -61,7 +61,10 @@ function render(){
      c.append(step('03',x.channelReplies[idx],[[x.continueLabel,'interested'],[x.notRelevant,'decline']],2));
      if(path[2]){
       const d=branch(c);
-      if(path[2]==='decline')d.append(step(x.finish,x.declineText,[],3));
+      if(path[2]==='decline'){
+       d.append(step('04',x.recommendLater,x.recommendLaterChoices.map((v,i)=>[v,'reason'+i]),3));
+       if(path[3]){const e=branch(d);e.append(step('05',path[3]==='reason0'?x.recommendNotNeeded:x.recommendNotNow,path[3]==='reason1'?x.recommendPermission.map((v,i)=>[v,'permit'+i]):[[x.decline,'stop']],4));if(path[4]){const f=branch(e);f.append(step(x.finish,path[4]==='permit0'?x.recommendSms:x.declineText,[],5))}}
+      }
       else{
        d.append(step('04',x.discoveryNext,[[x.send,'send'],[x.askPrice,'price'],[x.later,'later'],[x.decline,'decline']],3));
        if(path[3]){
