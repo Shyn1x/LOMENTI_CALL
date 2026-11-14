@@ -249,6 +249,14 @@ function render(){
        }
       }
      }
+    }else if(scenario===2 && path[1]==='price'){
+     const ru=language==='ru';
+     c.append(step('03',ru?'Стоимость зависит от объёма работ. Можно начать с одной конкретной доработки, а после оценки согласовать цену без обязательств. Хотите получить примеры?':'Cena ir atkarīga no darba apjoma. Var sākt ar vienu konkrētu uzlabojumu un pēc izvērtēšanas vienoties par cenu bez saistībām. Vai vēlaties saņemt piemērus?',[[x.send,'send'],[x.decline,'stop']],2));
+     if(path[2]){
+      const d=branch(c);
+      d.append(step(path[2]==='send'?'04':x.finish,path[2]==='send'?x.selfContactText:x.declineText,path[2]==='send'?x.delivery.map((v,i)=>[v,'delivery'+i]):[],3));
+      if(path[3]&&path[2]==='send'){const e=branch(d);e.append(step(x.finish,x.deliveryEnd[Number(path[3].slice(8))],[],4))}
+     }
     }else if(scenario===2){
      const ru=language==='ru',a=(r,l)=>ru?r:l;
      const bye=a('Спасибо за разговор! Не буду отвлекать. Хорошего дня!','Paldies par sarunu! Netraucēšu. Lai jauka diena!');
