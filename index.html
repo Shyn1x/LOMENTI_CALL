@@ -223,19 +223,19 @@ function render(){
           const g=branch(e),z=path[4];
           if(z!=='problem')g.append(step(x.finish,stop,[],5));
           else {
-           g.append(step('06',a('Спасибо, теперь понятнее. Мы можем оценить ваш сайт и предложить улучшения под эту задачу. Хотели бы получить пример похожей работы?','Paldies, tagad ir skaidrāk. Varam izvērtēt jūsu mājaslapu un piedāvāt uzlabojumus šim uzdevumam. Vai vēlaties saņemt līdzīga darba piemēru?'),[
+           g.append(step('06',a('Спасибо, теперь понятнее. Можем сначала разобраться, что именно мешает, и предложить варианты. Хотите, пришлю пару примеров?','Skaidrs, paldies. Varam apskatīt konkrēto problēmu un ieteikt, ko būtu vērts uzlabot. Vai būtu noderīgi apskatīt kādu piemēru?'),[
             [a('Да, интересно','Jā, interesē'),'yes'],[a('Дорого','Par dārgu'),'expensive'],[a('У нас есть разработчик','Mums ir izstrādātājs'),'developer'],[a('Сейчас не время','Šobrīd nav īstais laiks'),'later'],[x.decline,'stop']
            ],5));
            if(path[5]){
             const h=branch(g),q=path[5];
             if(q==='yes')h.append(step('07',x.selfContactText,x.delivery.map((v,i)=>[v,'delivery'+i]),6));
-            else if(q==='expensive')h.append(step('07',a('Понимаю. Можно начать с небольшой конкретной задачи: улучшить удобство, обновить отдельный раздел или добавить форму заявки. Сначала уточним объём и стоимость в удобное время. Вы уже определили бюджет или пока сравниваете варианты?','Saprotu. Var sākt ar nelielu konkrētu uzdevumu: uzlabot lietojamību, atjaunot sadaļu vai pievienot pieteikuma formu. Vispirms sev ērtā laikā precizēsim darba apjomu un cenu. Vai budžets jau ir noteikts vai vēl salīdzināt iespējas?'),[[a('Есть бюджет','Ir budžets'),'budget'],[a('Пока изучаем','Pagaidām pētām'),'explore'],[x.decline,'stop']],6));
+            else if(q==='expensive')h.append(step('07',a('Понимаю. Необязательно переделывать всё сразу. Можно начать с одной конкретной задачи, например улучшить форму заявки. Сначала уточним объём и стоимость в удобное время. Вы уже определили бюджет или пока сравниваете варианты?','Saprotu. Nav uzreiz jāpārtaisa visa mājaslapa. Var sākt ar vienu konkrētu uzlabojumu. Vispirms sev ērtā laikā precizēsim darba apjomu un cenu. Vai budžets jau ir noteikts vai vēl salīdzināt iespējas?'),[[a('Есть бюджет','Ir budžets'),'budget'],[a('Пока изучаем','Pagaidām pētām'),'explore'],[x.decline,'stop']],6));
             else if(q==='developer')h.append(step('07',a('Отлично, что у вас уже есть разработчик. Если когда-нибудь понадобится помощь с отдельной задачей, будем рады помочь. Сейчас всё удаётся реализовать своими силами?','Lieliski, ka jums jau ir izstrādātājs. Mēs nepiedāvājam viņu aizstāt: vajadzības gadījumā varam palīdzēt ar atsevišķu uzdevumu. Vai pašlaik visu izdodas paveikt pašu spēkiem?'),[[a('Да, всё хорошо','Jā, viss kārtībā'),'fine'],[a('Не всё','Ne visu'),'gap'],[x.decline,'stop']],6));
             else h.append(step(x.finish,stop,[],6));
             if(path[6]){
              const j=branch(h),u=path[6];
              if(q==='yes'&&u.startsWith('delivery'))j.append(step(x.finish,x.deliveryEnd[Number(u.slice(8))],[],7));
-             else if(u==='budget'||u==='explore'||u==='gap')j.append(step('08',a('Спасибо. Можем сначала оценить задачу и прислать информацию в удобное время. Хотите?','Paldies. Varam vispirms izvērtēt uzdevumu un nosūtīt informāciju sev ērtā laikā. Vai vēlaties?'),[[x.send,'send'],[x.decline,'stop']],7));
+             else if(u==='budget'||u==='explore'||u==='gap')j.append(step('08',a('Можем коротко описать возможные варианты письменно. Хотите, отправлю?','Paldies. Varam vispirms izvērtēt uzdevumu un nosūtīt informāciju sev ērtā laikā. Vai vēlaties?'),[[x.send,'send'],[x.decline,'stop']],7));
              else j.append(step(x.finish,stop,[],7));
              if(path[7]&&(u==='budget'||u==='explore'||u==='gap')){
               const k=branch(j);k.append(step(path[7]==='send'?'09':x.finish,path[7]==='send'?x.selfContactText:stop,path[7]==='send'?x.delivery.map((v,i)=>[v,'delivery'+i]):[],8));
@@ -251,7 +251,7 @@ function render(){
      }
     }else if(scenario===2 && path[1]==='price'){
      const ru=language==='ru';
-     c.append(step('03',ru?'Стоимость зависит от объёма работ. Можно начать с одной конкретной доработки, а после оценки согласовать цену в удобное время. Хотите получить примеры?':'Cena ir atkarīga no darba apjoma. Var sākt ar vienu konkrētu uzlabojumu un pēc izvērtēšanas vienoties par cenu sev ērtā laikā. Vai būtu noderīgi apskatīt pāris piemērus?',[[x.send,'send'],[x.decline,'stop']],2));
+     c.append(step('03',ru?'Стоимость зависит от задачи. Сначала нужно понять, что именно менять, а потом сможем назвать цену. Хотите получить примеры?':'Cena ir atkarīga no konkrētā uzdevuma. Var sākt ar vienu konkrētu uzlabojumu un pēc izvērtēšanas vienoties par cenu sev ērtā laikā. Vai būtu noderīgi apskatīt pāris piemērus?',[[x.send,'send'],[x.decline,'stop']],2));
      if(path[2]){
       const d=branch(c);
       d.append(step(path[2]==='send'?'04':x.finish,path[2]==='send'?x.selfContactText:x.declineText,path[2]==='send'?x.delivery.map((v,i)=>[v,'delivery'+i]):[],3));
