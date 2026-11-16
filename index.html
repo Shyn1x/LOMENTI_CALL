@@ -120,7 +120,7 @@ function render(){
      ],2));
      if(path[2]){
       const d=branch(c);
-      if(path[2]==='adStop')d.append(step(x.finish,a('Хорошо, не буду отвлекать. Спасибо за ваше время!','Labi, netraucēšu. Paldies par jūsu laiku!'),[],3));
+      if(path[2]==='adStop'){d.append(step('04',a('Извините за личный вопрос. Не будем обсуждать рекламу. Можно только уточнить: сам сайт вам сейчас актуален?','Atvainojiet par jautājumu. Reklāmu neapspriedīsim. Vai pati mājaslapa jums šobrīd būtu aktuāla?'),[[a('Да, актуален','Jā, aktuāla'),'yes'],[a('Нет, не актуален','Nē, nav aktuāla'),'no'],[x.decline,'stop']],3));if(path[3]){const e=branch(d);e.append(step(path[3]==='yes'?'05':x.finish,path[3]==='yes'?x.discoveryNext:x.declineText,path[3]==='yes'?[[x.send,'send'],[x.decline,'stop']]:[],4));if(path[4]&&path[3]==='yes'){const f=branch(e);f.append(step(path[4]==='send'?'06':x.finish,path[4]==='send'?x.selfContactText:x.declineText,path[4]==='send'?x.delivery.map((v,i)=>[v,'delivery'+i]):[],5))}}}
       else {
        const lines={
         ad0:a('Хорошо, услышал вас. Сайт может дополнить рекламу: услуги, цены и контакты будут в одном месте. Хотели бы посмотреть пару примеров?','Labi, paldies. Mājaslapa var papildināt reklāmu: pakalpojumi, cenas un kontakti būs vienuviet. Vai vēlaties apskatīt pāris piemērus?'),
@@ -159,7 +159,7 @@ function render(){
      c.append(step('03',x.channelReplies[3],(isRu?['По знакомым','Проходят мимо','Другим способом','Не хочу обсуждать']:['No paziņām','Ejot garām','Citādi','Nevēlos apspriest']).map((v,i)=>[v,'source'+i]),2));
      if(path[2]){
       const d=branch(c),stop=path[2]==='source3';
-      if(stop)d.append(step(x.finish,isRu?'Я вас услышал. Не буду отвлекать. Спасибо за ваше время, хорошего дня!':'Skaidrs, netraucēšu. Paldies par jūsu laiku, lai jauka diena!',[],3));
+      if(stop){d.append(step('04',isRu?'Извините, не будем обсуждать, откуда приходят клиенты. Один вопрос: собственный сайт вам сейчас интересен?':'Atvainojiet, neapspriedīsim klientu piesaisti. Vai sava mājaslapa jums šobrīd interesētu?',[[a('Да, интересен','Jā, interesē'),'yes'],[a('Нет, спасибо','Nē, paldies'),'no'],[x.decline,'stop']],3));if(path[3]){const e=branch(d);e.append(step(path[3]==='yes'?'05':x.finish,path[3]==='yes'?x.discoveryNext:x.declineText,path[3]==='yes'?[[x.send,'send'],[x.decline,'stop']]:[],4))}}
       else {
        d.append(step('04',isRu?'Понятно, спасибо. А было бы полезно, если бы новым клиентам было проще посмотреть ваши услуги и контакты в одном месте?':'Skaidrs, paldies. Vai būtu noderīgi, ja jaunie klienti vienuviet varētu apskatīt jūsu pakalpojumus un kontaktus?',[[x.continueLabel,'interested'],[x.notRelevant,'decline']],3));
        if(path[3]){
@@ -222,7 +222,7 @@ function render(){
          e.append(step('05',questions[w],[[a('Есть сложности','Ir grūtības'),'problem'],[a('Всё работает хорошо','Viss darbojas labi'),'fine'],[a('Не хочу обсуждать','Nevēlos apspriest'),'stop']],4));
          if(path[4]){
           const g=branch(e),z=path[4];
-          if(z!=='problem')g.append(step(x.finish,stop,[],5));
+          if(z!=='problem'){if(z==='stop'){g.append(step('06',a('Извините за подробный вопрос. Не будем обсуждать сложности. Подскажите только, помощь с сайтом вам сейчас актуальна?','Atvainojiet par jautājumu. Grūtības neapspriedīsim. Vai palīdzība ar mājaslapu jums šobrīd būtu aktuāla?'),[[a('Да','Jā'),'yes'],[a('Нет','Nē'),'no'],[x.decline,'stop']],5));if(path[5]){const h=branch(g);h.append(step(path[5]==='yes'?'07':x.finish,path[5]==='yes'?x.selfContactText:stop,path[5]==='yes'?x.delivery.map((v,i)=>[v,'delivery'+i]):[],6))}}else g.append(step(x.finish,stop,[],5))}
           else {
            g.append(step('06',a('Спасибо, теперь понятнее. Можем сначала разобраться, что именно мешает, и предложить варианты. Хотите, пришлю пару примеров?','Skaidrs, paldies. Varam apskatīt konkrēto problēmu un ieteikt, ko būtu vērts uzlabot. Vai būtu noderīgi apskatīt kādu piemēru?'),[
             [a('Да, интересно','Jā, interesē'),'yes'],[a('Дорого','Par dārgu'),'expensive'],[a('У нас есть разработчик','Mums ir izstrādātājs'),'developer'],[a('Сейчас не время','Šobrīd nav īstais laiks'),'later'],[x.decline,'stop']
