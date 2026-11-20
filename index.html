@@ -553,11 +553,11 @@ function render(){
       const d=branch(c),stop=path[2]==='source3';
       if(stop){d.append(step(x.finish,x.declineText,[],3))}
       else {
-       d.append(step('04',isRu?'Понятно, спасибо. А было бы полезно, если бы новым клиентам было проще посмотреть ваши услуги и контакты в одном месте?':'Skaidrs, paldies. Vai būtu noderīgi, ja jaunie klienti vienuviet varētu apskatīt jūsu pakalpojumus un kontaktus?',[[x.continueLabel,'interested'],[x.notRelevant,'decline']],3));
+       d.append(step('04',isRu?"Если человек узнал о вас от знакомых или просто проходил мимо, ему часто нужно сначала понять, какие услуги вы предлагаете и как с вами связаться. Было бы полезно иметь одну ссылку с услугами, ориентиром по ценам и контактами?":"Ja cilvēks par jums uzzinājis no paziņām vai vienkārši gājis garām, viņam vispirms jānoskaidro pakalpojumi un saziņas iespējas. Vai noderētu viena saite ar pakalpojumiem, aptuvenajām cenām un kontaktiem?",[[x.continueLabel,'interested'],[x.notRelevant,'decline']],3));
        if(path[3]){
         const e=branch(d);
-        if(path[3]==='decline')e.append(step(x.finish,isRu?'Хорошо, спасибо за ответ. Значит, сейчас это не требуется. Спасибо за разговор, хорошего дня!':'Skaidrs, tātad šobrīd tas nav nepieciešams. Paldies par sarunu, lai jauka diena!',[],4));
-        else {e.append(step('05',isRu?'Сайт может дополнить рекомендации: по одной ссылке клиент увидит услуги, адрес и способы связи. Могу отправить пару примеров, если вам интересно?':'Mājaslapa var papildināt ieteikumus: vienā saitē klients redzēs pakalpojumus, adresi un kontaktus. Vai drīkstu nosūtīt pāris piemērus?',[[x.send,'send'],[x.decline,'decline']],4));
+        if(path[3]==='decline')e.append(step(x.finish,isRu?"Если всё нужное люди уже узнают без сайта, не буду предлагать лишнее. Всего доброго!":"Ja cilvēki jau tagad visu uzzina bez mājaslapas, nevēlos piedāvāt lieku pakalpojumu. Visu labu!",[],4));
+        else {e.append(step('05',isRu?"Например, вместо нескольких сообщений с фотографиями и объяснениями вы отправляете клиенту одну ссылку с услугами, работами и контактами. Это не обещание новых клиентов, а способ удобнее представить бизнес. Могу показать два примера?":"Piemēram, vairāku ziņu ar foto un skaidrojumiem vietā klientam var nosūtīt vienu saiti ar pakalpojumiem, darbiem un kontaktiem. Tas nav solījums par jauniem klientiem, bet ērts veids, kā iepazīstināt ar uzņēmumu. Vai parādīt divus piemērus?",[[x.send,'send'],[x.decline,'decline']],4));
          if(path[4]){const f=branch(e);f.append(step(x.finish,path[4]==='send'?x.selfContactText:x.declineText,path[4]==='send'?x.delivery.map((v,i)=>[v,'delivery'+i]):[],5));if(path[5]&&path[4]==='send'){const g=branch(f);g.append(step(x.finish,x.deliveryEnd[Number(path[5].slice(8))],[],6))}}
         }
        }
@@ -569,8 +569,8 @@ function render(){
      if(path[2]){
       const d=branch(c);
       if(path[2]==='decline'){
-       d.append(step('04',isRu?'Услышал вас, спасибо за ответ. А собственный сайт вы когда-нибудь рассматривали или пока не было необходимости?':'Paldies par atbildi. Vai esat kādreiz apsvēruši savu mājaslapu, vai līdz šim nav bijusi vajadzība?',[[a('Рассматривали','Esam apsvēruši'),'considered'],[a('Не задумывались','Neesam domājuši'),'notthought'],[x.decline,'stop']],3));
-       if(path[3]){const e=branch(d);if(path[3]==='stop')e.append(step(x.finish,x.declineText,[],4));else{e.append(step('05',path[3]==='considered'?(isRu?'А что пока останавливало от создания сайта?':'Kas līdz šim atturēja no mājaslapas izveides?'):(isRu?'Сайт может собрать услуги, адрес и контакты в одном месте. Хотите посмотреть примеры?':'Mājaslapā var apkopot pakalpojumus un kontaktus. Vai vēlaties apskatīt piemērus?'),[[x.send,'send'],[x.decline,'stop']],4));if(path[4]){const f=branch(e);f.append(step(path[4]==='send'?'06':x.finish,path[4]==='send'?x.selfContactText:x.declineText,path[4]==='send'?x.delivery.map((v,i)=>[v,'delivery'+i]):[],5));if(path[4]==='send'&&path[5]){const g=branch(f);g.append(step(x.finish,x.deliveryEnd[Number(path[5].slice(8))],[],6))}}}}
+       d.append(step('04',isRu?"Не хочу предлагать решение, которое вам не нужно. Вы когда-нибудь думали об отдельном сайте или пока и без него вся информация доходит до клиентов?":"Negribu piedāvāt risinājumu, kas nav vajadzīgs. Vai kādreiz esat domājuši par atsevišķu mājaslapu, vai arī līdz šim klienti visu informāciju saņem bez tās?",[[a('Рассматривали','Esam apsvēruši'),'considered'],[a('Не задумывались','Neesam domājuši'),'notthought'],[x.decline,'stop']],3));
+       if(path[3]){const e=branch(d);if(path[3]==='stop')e.append(step(x.finish,x.declineText,[],4));else{e.append(step('05',path[3]==='considered'?(isRu?"Что раньше останавливало: стоимость, нехватка времени на материалы или ощущение, что соцсетей и рекомендаций вполне хватает? Так я пойму, есть ли смысл продолжать разговор.":"Kas līdz šim atturēja: izmaksas, laika trūkums materiālu sagatavošanai vai tas, ka ar sociālajiem tīkliem un ieteikumiem pietiek? Tad sapratīšu, vai sarunu ir vērts turpināt."):(isRu?"Даже простой сайт до 5 страниц может содержать услуги, фотографии работ, график, адрес и форму связи. Если это было бы полезно вашим клиентам, могу отправить пару примеров; если нет — настаивать не буду.":"Arī vienkārša mājaslapa ar līdz 5 lapām var ietvert pakalpojumus, darbu foto, darba laiku, adresi un saziņas formu. Ja tas būtu noderīgi jūsu klientiem, varu nosūtīt pāris piemērus; ja ne — neuzstāšu."),[[x.send,'send'],[x.decline,'stop']],4));if(path[4]){const f=branch(e);f.append(step(path[4]==='send'?'06':x.finish,path[4]==='send'?x.selfContactText:x.declineText,path[4]==='send'?x.delivery.map((v,i)=>[v,'delivery'+i]):[],5));if(path[4]==='send'&&path[5]){const g=branch(f);g.append(step(x.finish,x.deliveryEnd[Number(path[5].slice(8))],[],6))}}}}
       }
       else{
        d.append(step('04',x.discoveryNext,[[x.send,'send'],[x.askPrice,'price'],[x.later,'later'],[x.decline,'decline']],3));
@@ -581,7 +581,8 @@ function render(){
       }
      }
     }else if(scenario===1 && path[1]==='price'){
-     c.append(step('03',x.pricing,[[x.send,'send'],[x.decline,'decline']],2));
+     const a=(r,l)=>language==='ru'?r:l;
+     c.append(step('03',a('Если вам нужен новый сайт, Start стоит 50 € в месяц с НДС: 600 € за первые 12 месяцев, до 5 страниц и две небольшие правки контента в месяц. Но улучшение уже существующего сайта — отдельная задача: стоимость зависит от платформы и того, что именно нужно поменять. Например, исправить мобильную версию и добавить систему записи — это разный объём работ. Можем сначала уточнить проблему и дать оценку, а затем отправить предложение письменно. Разрешаете?','Ja vajadzīga jauna mājaslapa, Start maksā 50 € mēnesī ar PVN: 600 € pirmajos 12 mēnešos, līdz 5 lapām un divi nelieli satura labojumi mēnesī. Taču jau esošas mājaslapas uzlabošana ir atsevišķs uzdevums: cena atkarīga no platformas un vajadzīgajām izmaiņām. Piemēram, mobilās versijas labošana un pieraksta sistēma ir atšķirīgi darbi. Varam vispirms precizēt problēmu, novērtēt apjomu un tad nosūtīt piedāvājumu rakstiski. Vai drīkstam?'),[[x.send,'send'],[x.decline,'decline']],2));
      if(path[2]){const d=branch(c);d.append(step(x.finish,path[2]==='send'?x.endLead:x.declineText,[],3))}
     }else if(scenario===1){
      const ru=language==='ru',a=(r,l)=>ru?r:l;
@@ -644,7 +645,7 @@ function render(){
      }
     }else if(scenario===2 && path[1]==='price'){
      const ru=language==='ru';
-     c.append(step('03',ru?'Стоимость зависит от задачи. Сначала нужно понять, что именно менять, а потом сможем назвать цену. Хотите получить примеры?':'Cena ir atkarīga no konkrētā uzdevuma. Var sākt ar vienu konkrētu uzlabojumu un pēc izvērtēšanas vienoties par cenu sev ērtā laikā. Vai būtu noderīgi apskatīt pāris piemērus?',[[x.send,'send'],[x.decline,'stop']],2));
+     c.append(step('03',ru?'Для доработки существующего сайта стоимость рассчитывается по задаче: одно дело — изменить структуру и кнопки, другое — добавить запись, каталог или AI-чатбота. Тариф Start за 50 € в месяц относится к созданию нового информационного сайта до 5 страниц, не к любой доработке. Если скажете, какой сайт и что нужно изменить, оценим работу отдельно и согласуем цену заранее. Разрешаете отправить примеры?':'Esošas mājaslapas uzlabojumiem cenu rēķina pēc uzdevuma: viena lieta ir mainīt struktūru un pogas, pavisam cita — pievienot pierakstu, katalogu vai AI čatbotu. Start tarifs 50 € mēnesī attiecas uz jaunas informatīvas vietnes izveidi ar līdz 5 lapām, nevis jebkuru uzlabojumu. Ja norādīsiet vietni un vajadzīgās izmaiņas, darbu novērtēsim atsevišķi un cenu saskaņosim iepriekš. Vai drīkstam nosūtīt piemērus?',[[x.send,'send'],[x.decline,'stop']],2));
      if(path[2]){
       const d=branch(c);
       d.append(step(path[2]==='send'?'04':x.finish,path[2]==='send'?x.selfContactText:x.declineText,path[2]==='send'?x.delivery.map((v,i)=>[v,'delivery'+i]):[],3));
