@@ -94,12 +94,7 @@ function renderCallHelpers(){
  box.append(choices);
  if(selectedObjection>=0){const detail=document.createElement('div');detail.className='branch';detail.append(step(ru?'Ответ Валдиса':'Valda atbilde',objectionData[locale][selectedObjection][1],[],0));box.append(detail);}
  app.append(box);
- const finish=document.createElement('section');finish.className='step call-helper-panel';finish.style.marginTop='18px';const title=document.createElement('h2');title.textContent=ru?'Результат звонка':'Zvana rezultāts';finish.append(title);
- const options=document.createElement('div');options.className='choices';
- outcomes[locale].forEach((entry,i)=>options.append(button(entry[0],()=>{selectedOutcome=selectedOutcome===i?-1:i;render()},selectedOutcome===i)));
- finish.append(options);
- if(selectedOutcome>=0){const d=document.createElement('p');d.textContent=outcomes[locale][selectedOutcome][1];finish.append(d);}
- app.append(finish);
+
 }
 
 function render(){
