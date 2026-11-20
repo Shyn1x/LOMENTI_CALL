@@ -56,6 +56,7 @@ function render(){
   const g=document.createElement('div');g.className='grid';
   x.scenarios.forEach(([name,desc],i)=>{const b=document.createElement('button');b.className='tile';b.textContent=name;const sm=document.createElement('small');sm.textContent=desc;b.append(sm);b.onclick=()=>{scenario=i;path=[];render()};g.append(b)});
   const faqBtn=document.createElement('button');faqBtn.className='tile faq-tile';faqBtn.textContent=language==='ru'?'📚 Вопросы клиентов · Шпаргалка':'📚 Klientu jautājumi · Špikeris';const faqSub=document.createElement('small');faqSub.textContent=language==='ru'?'151 ответ · цены, договор, услуги, поддержка и другое':'151 atbilde · cenas, līgums, pakalpojumi, atbalsts un citi';faqBtn.append(faqSub);faqBtn.onclick=()=>{window.faqOpen=true;render()};g.append(faqBtn);
+  const offerBtn=document.createElement('button');offerBtn.className='tile faq-tile';offerBtn.textContent=language==='ru'?'🐱 Тариф Start · Наглядно':'🐱 Start tarifs · Vizuāli';const offerSub=document.createElement('small');offerSub.textContent=language==='ru'?'50 € в месяц · что входит и почему это выгодно':'50 € mēnesī · kas iekļauts un kāpēc izdevīgi';offerBtn.append(offerSub);offerBtn.onclick=()=>{window.location.href='./offer.html'};g.append(offerBtn);
   app.append(g);return;
  }
  const back=button(x.home,()=>{scenario=null;path=[];render()});back.className='back';app.append(back);
