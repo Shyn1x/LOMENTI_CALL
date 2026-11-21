@@ -5,6 +5,11 @@ const faq=typeof FAQ_GROUPS!=="undefined"?FAQ_GROUPS:[];
 const $=id=>document.getElementById(id);
 let endpoint="",key="",busy=false;
 let lastAnswer=null, lastSavedText="";
+let assistantLang=null;
+// The guide's RU/LV switch controls the guide, but the assistant answers in
+// the language of the actual question (including Latvian without diacritics).
+const assistantLanguage=()=>assistantLang||language;
+const assistantTr=(r,l)=>assistantLanguage()==="ru"?r:l;
 window.guideLastSavedText="";
 const ru=()=>language==="ru";
 const tr=(r,l)=>ru()?r:l;
@@ -27,6 +32,23 @@ async function api(path,method="GET",body){
 function normalize(s){return (s||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/ё/g,"е").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim()}
 const stop=new Set(["и","а","на","в","с","по","за","до","у","о","не","вы","мы","мне","нам","там","это","ли","как","что","же","бы","или","для","то","про","the","a","un","ar","par","vai","kas","ka","ir","to","no","pie","man","jums","mums","kur","butu","kā","vai"]);
 function tokens(t){return normalize(t).split(" ").filter(x=>x.length>2&&!stop.has(x))}
+function detectQuestionLanguage(question){
+ const raw=String(question||"");
+ if (/[а-яё]/i.test(raw)) return "ru";
+ if (/[āčēģīķļņšūž]/i.test(raw)) return "lv";
+ // Common words make the choice work for "Cik maksa domens" too.
+ // For unclear short text, respect the user's existing language selection.
+ const lvWords=new Set(["cik","maksa","maksat","domens","domenu","majаslapa","majaslapa","vietne","lapa","cena","izmaksas","izmaksа","vai","kads","kada","kapec","kur","ka","kas","kad","ko","jus","jums","man","mes","var","busi","bus","ir","nav","pie","bez","ar","par","sveiki","labdien","hostings","hostingu","atlaide","termins","izstrade","ludzu"]);
+ const ruRomanWords=new Set(["skolko","stoit","stoimost","kak","kakaya","kakoi","pochemu","sait","sayt","saita","sdelat","nuzhno","mozhno","domen","domena","hosting","cena","tsena","privet","zdravstvuyte","spasibo","u","menya","vopros","est","net","eto","eto","chto"]);
+ let lv=0,ruScore=0;
+ for(const word of normalize(raw).split(" ").filter(Boolean)){
+  if(lvWords.has(word))lv+=(word==="cik"||word==="maksa"||word==="domens"?3:2);
+  if(ruRomanWords.has(word))ruScore+=word==="skolko"||word==="stoit"?3:2;
+ }
+ if(lv>ruScore && lv>0)return "lv";
+ if(ruScore>lv && ruScore>0)return "ru";
+ return language;
+}
 function grams(s){const x=" "+normalize(s)+" ",r=new Set();for(let i=0;i<x.length-2;i++)r.add(x.slice(i,i+3));return r}
 function sim(a,b){const x=grams(a),y=grams(b);if(!x.size||!y.size)return 0;let n=0;for(const p of x)if(y.has(p))n++;return 2*n/(x.size+y.size)}
 function rowScore(q,row){
@@ -45,43 +67,51 @@ const indexed=faq.flatMap((group,gi)=>group[2].map((row,ri)=>({row,gi,ri,group})
 function findLocal(q){
  return indexed.map(e=>({...e,score:rowScore(q,e.row)})).sort((a,b)=>b.score-a.score).slice(0,4);
 }
-function showMatch(entry,origin="local"){
- const row=entry.row, i=ru()?0:1;
+function showMatch(entry,origin="local",replyLang=assistantLanguage()){
+ const row=entry.row, i=replyLang==="ru"?0:1;
+ const tt=(r,l)=>replyLang==="ru"?r:l;
  const wrap=$("assist-result");wrap.replaceChildren();
  const p=document.createElement("div");p.className="assist-answer";p.textContent=row[i+2];wrap.append(p);
- const src=document.createElement("p");src.className="assist-source";src.textContent=tr("Источник: ","Avots: ")+entry.group[i]+" · "+row[i]+(origin==="local"?tr(" · поиск по FAQ без AI"," · FAQ meklēšana bez AI"):" · AI FAQ");wrap.append(src);
+ const src=document.createElement("p");src.className="assist-source";src.textContent=tt("Источник: ","Avots: ")+entry.group[i]+" · "+row[i]+(origin==="local"?tt(" · поиск по FAQ без AI"," · FAQ meklēšana bez AI"):" · AI FAQ");wrap.append(src);
  const buttons=document.createElement("div");buttons.className="assist-toolbar";
- const copy=document.createElement("button");copy.textContent=tr("Скопировать","Kopēt");copy.onclick=()=>navigator.clipboard?.writeText(row[i+2]);buttons.append(copy);
- const open=document.createElement("button");open.textContent=tr("Открыть в FAQ","Atvērt FAQ");open.onclick=()=>{
+ const copy=document.createElement("button");copy.textContent=tt("Скопировать","Kopēt");copy.onclick=()=>navigator.clipboard?.writeText(row[i+2]);buttons.append(copy);
+ const open=document.createElement("button");open.textContent=tt("Открыть в FAQ","Atvērt FAQ");open.onclick=()=>{
+  // FAQ questions must be displayed in the same language as the answer.
+  if(language!==replyLang){language=replyLang;document.documentElement.lang=language;window.updateGuideLabels?.();}
   window.faqOpen=true;faqCategory=entry.gi;render();
   setTimeout(()=>{const wanted=row[i];const item=Array.from(document.querySelectorAll(".faq-item")).find(n=>n.querySelector("summary")?.textContent===wanted);if(item){item.open=true;item.scrollIntoView({behavior:"smooth",block:"center"})}},30);
  };buttons.append(open);wrap.append(buttons);lastAnswer=entry;
 }
-function showChoices(hits,message){
+function showChoices(hits,message,replyLang=assistantLanguage()){
  const wrap=$("assist-result");wrap.replaceChildren();
  const p=document.createElement("div");p.className="assist-answer";p.textContent=message;wrap.append(p);
  const options=document.createElement("div");options.className="assist-options";
  for(const item of hits.slice(0,3)){
   if(item.score<.15)continue;
-  const b=document.createElement("button");b.textContent=item.row[ru()?0:1];b.onclick=()=>showMatch(item);options.append(b);
+  const b=document.createElement("button");b.textContent=item.row[replyLang==="ru"?0:1];b.onclick=()=>showMatch(item,"local",replyLang);options.append(b);
  }wrap.append(options);
 }
 async function ask(question){
  const q=(question||"").trim();if(!q)return;
- if(busy)return;busy=true;$("assist-ask").disabled=true;
- const wrap=$("assist-result");wrap.textContent=tr("Ищу в базе...","Meklēju zināšanu bāzē...");
+ if(busy)return;
+ const replyLang=detectQuestionLanguage(q);
+ assistantLang=replyLang;
+ window.mountFAQAssistant?.();
+ const tt=(r,l)=>replyLang==="ru"?r:l;
+ busy=true;$("assist-ask").disabled=true;
+ const wrap=$("assist-result");wrap.textContent=tt("Ищу в базе...","Meklēju zināšanu bāzē...");
  try{
   if(endpoint&&key){
-   const r=await api("/api/ask","POST",{question:q,lang:language});
-   if(r.matched&&indexed[r.id]){showMatch(indexed[r.id],"ai");return}
-   if(r.clarification){showChoices(findLocal(q),r.clarification);return}
+   const r=await api("/api/ask","POST",{question:q,lang:replyLang});
+   if(r.matched&&indexed[r.id]){showMatch(indexed[r.id],"ai",replyLang);return}
+   if(r.clarification){showChoices(findLocal(q),tt("В базе нет однозначного ответа. Уточни вопрос или выбери тему ниже.","Zināšanu bāzē nav viennozīmīgas atbildes. Precizē jautājumu vai izvēlies tēmu zemāk."),replyLang);return}
   }
   const hits=findLocal(q);
-  if(hits[0] && hits[0].score>=.65 && (hits.length===1||hits[0].score-hits[1].score>=.12))showMatch(hits[0]);
-  else showChoices(hits,tr("Не могу уверенно выбрать ответ. Уточни вопрос или выбери подходящую тему ниже.","Nevaru droši izvēlēties atbildi. Precizē jautājumu vai izvēlies tēmu zemāk."));
+  if(hits[0] && hits[0].score>=.65 && (hits.length===1||hits[0].score-hits[1].score>=.12))showMatch(hits[0],"local",replyLang);
+  else showChoices(hits,tt("Не могу уверенно выбрать ответ. Уточни вопрос или выбери подходящую тему ниже.","Nevaru droši izvēlēties atbildi. Precizē jautājumu vai izvēlies tēmu zemāk."),replyLang);
  }catch(e){
   const hits=findLocal(q);
-  showChoices(hits,tr("AI-сервер недоступен; показываю варианты из FAQ. Ответ не выдумываю.","AI serveris nav pieejams; rādu FAQ variantus. Atbildi neizdomāju."));
+  showChoices(hits,tt("AI-сервер недоступен; показываю варианты из FAQ. Ответ не выдумываю.","AI serveris nav pieejams; rādu FAQ variantus. Atbildi neizdomāju."),replyLang);
  }finally{busy=false;$("assist-ask").disabled=false}
 }
 function makeAssistant(){
@@ -99,10 +129,10 @@ function makeAssistant(){
 window.mountFAQAssistant=()=>{
  const safety=$("safety");if(!safety)return;
  let box=$("faq-assistant");if(!box){box=makeAssistant();safety.append(box)}
- $("assist-heading").textContent=tr("AI-помощник по FAQ","AI palīgs no FAQ");
- $("assist-sub").textContent=endpoint&&key?tr("AI выбирает подходящий ответ из базы. Без выдумок.","AI atlasa atbildi no datubāzes. Bez izdomājumiem."):tr("Пока работает локальный поиск по FAQ. AI включится после подключения сервера.","Pagaidām pieejama lokāla FAQ meklēšana. AI būs pēc servera pieslēgšanas.");
- $("assist-question").placeholder=tr("Что спросил клиент? Можно с опечатками...","Ko jautāja klients? Var ar drukas kļūdām...");
- $("assist-ask").textContent=tr("Найти ответ","Atrast atbildi");
+ $("assist-heading").textContent=assistantTr("AI-помощник по FAQ","AI palīgs no FAQ");
+ $("assist-sub").textContent=endpoint&&key?assistantTr("AI выбирает подходящий ответ из базы. Без выдумок.","AI atlasa atbildi no datubāzes. Bez izdomājumiem."):assistantTr("Пока работает локальный поиск по FAQ. AI включится после подключения сервера.","Pagaidām pieejama lokāla FAQ meklēšana. AI būs pēc servera pieslēgšanas.");
+ $("assist-question").placeholder=assistantTr("Что спросил клиент? Можно с опечатками...","Ko jautāja klients? Var ar drukas kļūdām...");
+ $("assist-ask").textContent=assistantTr("Найти ответ","Atrast atbildi");
 };
 function refreshArchive(){
  const c=$("notes-archive-list");if(!c)return;c.replaceChildren();
@@ -173,6 +203,6 @@ $("guide-api-connect").onclick=async()=>{
  catch(e){endpoint="";key="";setStatus($("guide-api-status"),tr("Нет соединения. Проверьте адрес, HTTPS и ключ.","Nav savienojuma. Pārbaudiet adresi, HTTPS un atslēgu."))}
  window.mountFAQAssistant();
 };
-const langBtn=$("lang");langBtn.addEventListener("click",()=>setTimeout(refreshLabels,0));
+const langBtn=$("lang");langBtn.addEventListener("click",()=>{assistantLang=null;setTimeout(refreshLabels,0)});
 refreshArchive();refreshLabels();
 })();
