@@ -1,9 +1,9 @@
-/* Lomenti Call: FAQ-only assistant, local fallback, explicit notes archive. */
+/* Lomenti Call: local FAQ search and simple saved notes. */
 (()=>{
 "use strict";
 const faq=typeof FAQ_GROUPS!=="undefined"?FAQ_GROUPS:[];
 const $=id=>document.getElementById(id);
-let endpoint="",key="",busy=false;
+let busy=false;
 let lastAnswer=null, lastSavedText="";
 let assistantLang=null;
 // The guide's RU/LV switch controls the guide, but the assistant answers in
@@ -20,15 +20,6 @@ const DRAFT="lomenti-call-draft";
 function localEntries(){try{let x=JSON.parse(localStorage.getItem(ENTRIES)||"[]");return Array.isArray(x)?x.slice(0,100):[]}catch{return []}}
 function setLocalEntries(entries){localStorage.setItem(ENTRIES,JSON.stringify(entries.slice(0,100)))}
 function notify(message){if(STATUS())STATUS().textContent=message}
-function blobSave(content,name){const b=new Blob([content],{type:"text/plain;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
-function stamp(){return new Date().toISOString().replaceAll(":","-").slice(0,19)}
-function textExport(rows){return rows.map(e=>new Date(e.at).toLocaleString(ru()?"ru-RU":"lv-LV")+"\n"+e.text+"\n").join("\n---\n\n")}
-async function api(path,method="GET",body){
- if(!endpoint||!key)throw Error(tr("Сервер не подключён","Serveris nav pieslēgts"));
- const res=await fetch(endpoint+path,{method,headers:{"Content-Type":"application/json","X-Guide-Key":key},body:body?JSON.stringify(body):undefined,cache:"no-store",signal:AbortSignal.timeout(16000)});
- if(!res.ok)throw Error("HTTP "+res.status);
- return res.json();
-}
 function normalize(s){return (s||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/ё/g,"е").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim()}
 const stop=new Set(["и","а","на","в","с","по","за","до","у","о","не","вы","мы","мне","нам","там","это","ли","как","что","же","бы","или","для","то","про","the","a","un","ar","par","vai","kas","ka","ir","to","no","pie","man","jums","mums","kur","butu","kā","vai"]);
 function tokens(t){return normalize(t).split(" ").filter(x=>x.length>2&&!stop.has(x))}
@@ -67,12 +58,12 @@ const indexed=faq.flatMap((group,gi)=>group[2].map((row,ri)=>({row,gi,ri,group})
 function findLocal(q){
  return indexed.map(e=>({...e,score:rowScore(q,e.row)})).sort((a,b)=>b.score-a.score).slice(0,4);
 }
-function showMatch(entry,origin="local",replyLang=assistantLanguage()){
+function showMatch(entry,replyLang=assistantLanguage()){
  const row=entry.row, i=replyLang==="ru"?0:1;
  const tt=(r,l)=>replyLang==="ru"?r:l;
  const wrap=$("assist-result");wrap.replaceChildren();
  const p=document.createElement("div");p.className="assist-answer";p.textContent=row[i+2];wrap.append(p);
- const src=document.createElement("p");src.className="assist-source";src.textContent=tt("Источник: ","Avots: ")+entry.group[i]+" · "+row[i]+(origin==="local"?tt(" · поиск по FAQ без AI"," · FAQ meklēšana bez AI"):" · AI FAQ");wrap.append(src);
+ const src=document.createElement("p");src.className="assist-source";src.textContent=tt("Источник: ","Avots: ")+entry.group[i]+" · "+row[i];wrap.append(src);
  const buttons=document.createElement("div");buttons.className="assist-toolbar";
  const copy=document.createElement("button");copy.textContent=tt("Скопировать","Kopēt");copy.onclick=()=>navigator.clipboard?.writeText(row[i+2]);buttons.append(copy);
  const open=document.createElement("button");open.textContent=tt("Открыть в FAQ","Atvērt FAQ");open.onclick=()=>{
@@ -88,30 +79,20 @@ function showChoices(hits,message,replyLang=assistantLanguage()){
  const options=document.createElement("div");options.className="assist-options";
  for(const item of hits.slice(0,3)){
   if(item.score<.15)continue;
-  const b=document.createElement("button");b.textContent=item.row[replyLang==="ru"?0:1];b.onclick=()=>showMatch(item,"local",replyLang);options.append(b);
+  const b=document.createElement("button");b.textContent=item.row[replyLang==="ru"?0:1];b.onclick=()=>showMatch(item,replyLang);options.append(b);
  }wrap.append(options);
 }
 async function ask(question){
- const q=(question||"").trim();if(!q)return;
- if(busy)return;
- const replyLang=detectQuestionLanguage(q);
- assistantLang=replyLang;
+ const q=(question||"").trim();if(!q||busy)return;
+ const replyLang=detectQuestionLanguage(q);assistantLang=replyLang;
  window.mountFAQAssistant?.();
  const tt=(r,l)=>replyLang==="ru"?r:l;
  busy=true;$("assist-ask").disabled=true;
- const wrap=$("assist-result");wrap.textContent=tt("Ищу в базе...","Meklēju zināšanu bāzē...");
+ $("assist-result").textContent=tt("Ищу в справочнике...","Meklēju atbilžu krājumā...");
  try{
-  if(endpoint&&key){
-   const r=await api("/api/ask","POST",{question:q,lang:replyLang});
-   if(r.matched&&indexed[r.id]){showMatch(indexed[r.id],"ai",replyLang);return}
-   if(r.clarification){showChoices(findLocal(q),tt("В базе нет однозначного ответа. Уточни вопрос или выбери тему ниже.","Zināšanu bāzē nav viennozīmīgas atbildes. Precizē jautājumu vai izvēlies tēmu zemāk."),replyLang);return}
-  }
   const hits=findLocal(q);
-  if(hits[0] && hits[0].score>=.65 && (hits.length===1||hits[0].score-hits[1].score>=.12))showMatch(hits[0],"local",replyLang);
+  if(hits[0] && hits[0].score>=.65 && (hits.length===1||hits[0].score-hits[1].score>=.12))showMatch(hits[0],replyLang);
   else showChoices(hits,tt("Не могу уверенно выбрать ответ. Уточни вопрос или выбери подходящую тему ниже.","Nevaru droši izvēlēties atbildi. Precizē jautājumu vai izvēlies tēmu zemāk."),replyLang);
- }catch(e){
-  const hits=findLocal(q);
-  showChoices(hits,tt("AI-сервер недоступен; показываю варианты из FAQ. Ответ не выдумываю.","AI serveris nav pieejams; rādu FAQ variantus. Atbildi neizdomāju."),replyLang);
  }finally{busy=false;$("assist-ask").disabled=false}
 }
 function makeAssistant(){
@@ -129,61 +110,46 @@ function makeAssistant(){
 window.mountFAQAssistant=()=>{
  const safety=$("safety");if(!safety)return;
  let box=$("faq-assistant");if(!box){box=makeAssistant();safety.append(box)}
- $("assist-heading").textContent=assistantTr("AI-помощник по FAQ","AI palīgs no FAQ");
- $("assist-sub").textContent=endpoint&&key?assistantTr("AI выбирает подходящий ответ из базы. Без выдумок.","AI atlasa atbildi no datubāzes. Bez izdomājumiem."):assistantTr("Пока работает локальный поиск по FAQ. AI включится после подключения сервера.","Pagaidām pieejama lokāla FAQ meklēšana. AI būs pēc servera pieslēgšanas.");
+ $("assist-heading").textContent=assistantTr("Поиск готового ответа","Gatavas atbildes meklēšana");
+ $("assist-sub").textContent=assistantTr("Найди подходящий ответ из справочника вопросов клиентов.","Atrodi piemērotu atbildi klientu jautājumu krājumā.");
  $("assist-question").placeholder=assistantTr("Что спросил клиент? Можно с опечатками...","Ko jautāja klients? Var ar drukas kļūdām...");
  $("assist-ask").textContent=assistantTr("Найти ответ","Atrast atbildi");
 };
 function refreshArchive(){
- const c=$("notes-archive-list");if(!c)return;c.replaceChildren();
- const list=localEntries();
- if(!list.length){c.textContent=tr("На этом устройстве записей пока нет.","Šajā ierīcē ierakstu pagaidām nav.");return}
- for(const e of list.slice(0,30)){
-  const div=document.createElement("div");div.className="archive-entry";
-  const dt=document.createElement("strong");dt.textContent=new Date(e.at).toLocaleString(ru()?"ru-RU":"lv-LV");div.append(dt);
+ const c=$("notes-archive-list");if(!c)return;
+ c.replaceChildren();const list=localEntries();
+ const btn=$("notes-open");
+ if(btn)btn.textContent=tr("Мои заметки","Manas piezīmes")+(list.length?" ("+list.length+")":"");
+ if(!list.length){c.textContent=tr("Сохранённых заметок пока нет.","Saglabātu piezīmju vēl nav.");return}
+ for(const [i,e] of list.entries()){
+  const div=document.createElement("article");div.className="archive-entry";
+  const head=document.createElement("div");head.className="archive-entry-head";
+  const dt=document.createElement("strong");dt.textContent=new Date(e.at).toLocaleString(ru()?"ru-RU":"lv-LV");head.append(dt);
+  const remove=document.createElement("button");remove.type="button";remove.textContent=tr("Удалить","Dzēst");
+  remove.setAttribute("aria-label",tr("Удалить запись","Dzēst ierakstu"));
+  remove.onclick=()=>{
+   if(!confirm(tr("Удалить эту сохранённую заметку?","Vai dzēst šo saglabāto piezīmi?")))return;
+   try{setLocalEntries(localEntries().filter((_,j)=>j!==i));refreshArchive();notify(tr("Заметка удалена.","Piezīme dzēsta."))}
+   catch(e){notify(tr("Не удалось удалить запись.","Neizdevās izdzēst ierakstu."))}
+  };
+  head.append(remove);div.append(head);
   const p=document.createElement("p");p.textContent=e.text;div.append(p);c.append(div);
  }
 }
-function setStatus(el,t){if(el)el.textContent=t}
 async function saveNote(){
- const note=take();if(!note){notify(tr("Введите заметку.","Ievadiet piezīmi."));return}
- if(note.length>8000){notify(tr("Слишком длинная заметка (макс. 8000 символов).","Pārāk gara piezīme (maks. 8000 rakstzīmes)."));return}
- const item={at:new Date().toISOString(),text:note};
- try{setLocalEntries([item,...localEntries()]);}catch(e){notify(tr("Нет места в браузере. Скачайте TXT.","Pārlūkā nav vietas. Lejupielādējiet TXT."));return}
+ const note=take();if(!note){notify(tr("Напишите заметку перед сохранением.","Pirms saglabāšanas ierakstiet piezīmi."));return}
+ if(note.length>8000){notify(tr("Максимум 8000 символов.","Maksimums 8000 rakstzīmju."));return}
+ try{setLocalEntries([{at:new Date().toISOString(),text:note},...localEntries()]);}
+ catch(e){notify(tr("Не удалось сохранить: в браузере закончилось место.","Neizdevās saglabāt: pārlūkā nav pietiekami vietas."));return}
  try{sessionStorage.setItem(DRAFT,note)}catch(e){}
  window.guideLastSavedText=note;refreshArchive();
- if(endpoint&&key){
-  try{await api("/api/notes","POST",item);notify(tr("Сохранено на сервере и на этом устройстве.","Saglabāts serverī un šajā ierīcē."));return}
-  catch(e){notify(tr("Сохранено только на этом устройстве. Сервер недоступен.","Saglabāts tikai šajā ierīcē. Serveris nav pieejams."));return}
- }
- notify(tr("Сохранено только в браузере этого устройства. Для общей истории подключите сервер.","Saglabāts tikai šīs ierīces pārlūkā. Kopīgai vēsturei pieslēdziet serveri."));
-}
-async function loadRemote(){
- if(!endpoint||!key){notify(tr("Сначала подключите сервер.","Vispirms pieslēdziet serveri."));return}
- try{
-  const r=await api("/api/notes");const list=Array.isArray(r.items)?r.items:[];
-  const c=$("notes-archive-list");c.replaceChildren();
-  const title=document.createElement("p");title.textContent=tr("Записи на сервере: ","Servera ieraksti: ")+list.length;c.append(title);
-  for(const e of list){
-   const row=document.createElement("div");row.className="archive-entry";
-   const t=document.createElement("strong");t.textContent=new Date(e.at).toLocaleString(ru()?"ru-RU":"lv-LV");row.append(t);
-   const p=document.createElement("p");p.textContent=e.text;row.append(p);c.append(row);
-  }
- }catch(e){notify(tr("Не удалось загрузить серверную историю.","Neizdevās ielādēt servera vēsturi."))}
+ notify(tr("Сохранено. Запись доступна в «Моих заметках».","Saglabāts. Ieraksts pieejams sadaļā «Manas piezīmes»."));
 }
 function refreshLabels(){
- $("notes-save").textContent=tr("Сохранить заметки","Saglabāt piezīmes");
- $("notes-download").textContent=tr("Скачать TXT","Lejupielādēt TXT");
- $("notes-archive-title").textContent=tr("История на этом устройстве","Vēsture šajā ierīcē");
- $("notes-history-export").textContent=tr("Скачать историю TXT","Lejupielādēt vēsturi TXT");
- $("notes-history-delete").textContent=tr("Удалить локальную историю","Dzēst vietējo vēsturi");
- $("guide-connect-title").textContent=tr("Подключение сервера","Servera pieslēgšana");
- $("guide-connect-hint").textContent=tr("HTTPS API + ключ из настроек VPS. Ключ не сохраняется в браузере.","HTTPS API un VPS piekļuves atslēga. Atslēga netiek saglabāta pārlūkā.");
- $("guide-api-connect").textContent=tr("Подключить","Pieslēgt");
- $("guide-api-url").placeholder="https://api.example.com";
- if(!$("notes-remote-button")){const b=document.createElement("button");b.id="notes-remote-button";b.textContent=tr("Серверная история","Servera vēsture");b.onclick=loadRemote;$("notes-archive-list").after(b)}
- else $("notes-remote-button").textContent=tr("Серверная история","Servera vēsture");
- window.mountFAQAssistant();
+ $("notes-save").textContent=tr("Сохранить","Saglabāt");
+ $("notes-clear").textContent=tr("Очистить","Notīrīt");
+ $("notes-archive-title").textContent=tr("Мои заметки","Manas piezīmes");
+ refreshArchive();window.mountFAQAssistant();
 }
 window.updateGuideLabels=refreshLabels;
 const field=$("call-notes-text");
@@ -191,17 +157,10 @@ try{const draft=sessionStorage.getItem(DRAFT);if(draft && !field.value)field.val
 field.addEventListener("input",()=>{try{sessionStorage.setItem(DRAFT,field.value)}catch{}});
 $("notes-clear").addEventListener("click",()=>{setTimeout(()=>{if(!field.value){try{sessionStorage.removeItem(DRAFT)}catch{}}},30)});
 $("notes-save").onclick=saveNote;
-$("notes-download").onclick=()=>{if(!take())return notify(tr("Нет текста для скачивания.","Nav teksta lejupielādei."));blobSave(new Date().toLocaleString()+"\n"+take()+"\n","lomenti-note-"+stamp()+".txt")};
-$("notes-history-export").onclick=()=>{const list=localEntries();if(!list.length)return notify(tr("История пуста.","Vēsture ir tukša."));blobSave(textExport(list),"lomenti-history-"+stamp()+".txt")};
-$("notes-history-delete").onclick=()=>{if(confirm(tr("Удалить все локальные сохранённые записи? Серверные не затронутся.","Dzēst visus vietējos ierakstus? Servera ieraksti netiks dzēsti."))){try{localStorage.removeItem(ENTRIES)}catch{}refreshArchive()}};
-$("guide-api-connect").onclick=async()=>{
- const url=$("guide-api-url").value.trim().replace(/\/+$/,"");
- const secret=$("guide-api-key").value.trim();
- if(!/^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(url)||!secret){setStatus($("guide-api-status"),tr("Укажите HTTPS-адрес и ключ.","Norādiet HTTPS adresi un atslēgu."));return}
- endpoint=url;key=secret;$("guide-api-key").value="";
- try{await api("/api/health");setStatus($("guide-api-status"),tr("Сервер подключён.","Serveris pieslēgts."))}
- catch(e){endpoint="";key="";setStatus($("guide-api-status"),tr("Нет соединения. Проверьте адрес, HTTPS и ключ.","Nav savienojuma. Pārbaudiet adresi, HTTPS un atslēgu."))}
- window.mountFAQAssistant();
+$("notes-open").onclick=()=>{
+ const archive=$("notes-archive");archive.hidden=!archive.hidden;
+ $("notes-open").setAttribute("aria-expanded",String(!archive.hidden));
+ if(!archive.hidden)refreshArchive();
 };
 const langBtn=$("lang");langBtn.addEventListener("click",()=>{assistantLang=null;setTimeout(refreshLabels,0)});
 refreshArchive();refreshLabels();
