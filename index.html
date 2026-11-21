@@ -520,7 +520,7 @@ function render(){
    if(scenario===0){
     b.append(step('02',x.offer0,x.channels.map((v,i)=>[v,'channel'+i]),1));
    }else if(scenario===1){
-    b.append(step('02',language==='ru'?'Подскажите, можно задать один вопрос о вашем сайте?':'Vai drīkstu uzdot vienu jautājumu par jūsu mājaslapu?',[[language==='ru'?'Да, конечно':'Jā, protams','interested'],[x.price,'price'],[x.decline,'decline']],1));
+    b.append(step('02',language==='ru'?'Да, большое спасибо, что согласились. На данный момент я просматривал ваш сайт и заметил возможные правки, которые наша команда могла бы вам предложить. … (Валдис перечисляет заранее подготовленный список конкретных доработок для этой компании.)':'Jā, liels paldies, ka piekritāt aprunāties. Es apskatīju jūsu mājaslapu un pamanīju vairākas iespējamās izmaiņas, ko mūsu komanda varētu jums piedāvāt. … (Valdis nosauc iepriekš sagatavoto konkrēto uzlabojumu sarakstu šim uzņēmumam.)',[[x.interested,'interested'],[x.price,'price'],[x.decline,'decline']],1));
    }else{
     b.append(step('02',x['offer'+scenario],[[x.interested,'interested'],[x.price,'price'],[x.decline,'decline']],1));
    }
