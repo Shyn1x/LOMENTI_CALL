@@ -1,0 +1,23 @@
+[Unit]
+Description=Lomenti Call private notes and FAQ API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lomenti-call
+WorkingDirectory=/opt/lomenti-call
+EnvironmentFile=/etc/lomenti-call.env
+ExecStart=/usr/bin/python3 /opt/lomenti-call/backend/server.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/lomenti-call
+MemoryMax=180M
+TasksMax=45
+
+[Install]
+WantedBy=multi-user.target
