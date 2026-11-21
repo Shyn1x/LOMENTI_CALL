@@ -657,12 +657,12 @@ function render(){
     }else if(scenario===1){
      const ru=language==='ru',a=(r,l)=>ru?r:l;
      const stop=a("Если сайт вас полностью устраивает и улучшений не требуется, менять ничего не нужно. Удачного дня!","Ja mājaslapa jūs pilnībā apmierina un uzlabojumi nav vajadzīgi, neko mainīt nevajag. Lai veiksmīga diena!");
-     c.append(step('03',a("Если сайт уже работает, важнее понять его реальную задачу. Посетителям удобно читать страницы с телефона, находить услуги и отправлять заявки? Или есть один момент, который регулярно вызывает неудобства?","Ja mājaslapa jau darbojas, svarīgākais ir saprast tās uzdevumu. Vai apmeklētājiem telefonā ir ērti lasīt, atrast pakalpojumus un nosūtīt pieteikumus? Vai ir viena lieta, kas regulāri sagādā neērtības?"),[
+     c.append(step('03',a("Отлично, тогда подскажите: из тех изменений, которые я перечислил, что для вас наиболее актуально? Что хотелось бы исправить в первую очередь?","Lieliski! Tad pastāstiet, lūdzu, kura no manis minētajām izmaiņām jums šķiet visaktuālākā? Ko jūs vēlētos uzlabot vispirms?"),[
       [a('Всё устраивает','Viss apmierina'),'fine'],[a('Есть что улучшить','Ir ko uzlabot'),'improve'],[a('Не задумывались','Neesam domājuši'),'unsure'],[x.decline,'stop']
      ],2));
      if(path[2]){
       const d=branch(c),v=path[2];
-      if(v==='fine'||v==='stop')d.append(step(x.finish,stop,[],3));
+      if(v==='fine'||v==='stop')d.append(step(x.finish,v==='stop'?a("Понимаю, тогда на этом остановимся. Не буду отвлекать вас дальше. Хорошего вам дня!","Saprotu, tad ar to arī beigsim. Neaizkavēšu jūs ilgāk. Lai jums jauka diena!"):stop,[],3));
       else {
        const improving=v==='improve';
        d.append(step('04',improving?a("Давайте выберем одну проблему, а не будем переделывать сайт целиком. Что сейчас важнее: обновить дизайн, упростить пользование или добавить недостающую функцию?","Izvēlēsimies vienu problēmu, nevis uzreiz pārveidosim visu vietni. Kas šobrīd svarīgāk: atjaunot dizainu, uzlabot lietošanu vai pievienot trūkstošu funkciju?"):a("Необязательно планировать редизайн, чтобы улучшить сайт. Иногда достаточно сделать заметнее контакты или упростить форму заявки. Для вашего бизнеса сайт прежде всего объясняет услуги или помогает получать обращения?","Lai uzlabotu mājaslapu, nav obligāti jāplāno pilnīga dizaina maiņa. Reizēm pietiek izcelt kontaktus vai vienkāršot pieteikuma formu. Vai jūsu vietne vairāk skaidro pakalpojumus vai palīdz saņemt pieprasījumus?"),improving?[
@@ -777,7 +777,7 @@ function render(){
        }
       }
      }
-    }else if(path[1]==='decline')c.append(step(x.finish,x.declineText,[],2));
+    }else if(path[1]==='decline')c.append(step(x.finish,scenario===1?(language==='ru'?'Понимаю, тогда на этом остановимся. Не буду отвлекать вас дальше. Хорошего вам дня!':'Saprotu, tad ar to arī beigsim. Neaizkavēšu jūs ilgāk. Lai jums jauka diena!'):x.declineText,[],2));
     else{
      c.append(step('03',x.pricing,[[x.send,'send'],[x.later,'later'],[x.decline,'decline']],2));
      if(path[2]){
