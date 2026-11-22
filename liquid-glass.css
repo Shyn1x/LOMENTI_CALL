@@ -1,0 +1,238 @@
+/* LOMENTI CALL — amber/emerald optical liquid glass
+   Reference: dark smoked centre, thick transparent rim, warm-gold left,
+   saturated jade right, strong upper-right specular glint. */
+
+:root {
+  --lg-gold: rgba(255,196,38,.88);
+  --lg-jade: rgba(22,240,153,.86);
+  --lg-rim: rgba(222,255,232,.78);
+  --lg-ease: cubic-bezier(.22,1,.36,1);
+}
+
+/* The centre is transparent smoky glass. Colour lives mostly in the edges. */
+header,
+#app .grid > .tile,
+#app .step,
+.safety,
+.call-notes,
+#app .faq-item,
+#app .call-progress span,
+.call-helper-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 2px solid var(--lg-rim) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(ellipse 67% 95% at -5% 118%,rgba(255,196,30,.60) 0%,rgba(249,179,21,.22) 45%,transparent 79%),
+    radial-gradient(ellipse 73% 104% at 106% 119%,rgba(0,255,159,.62) 0%,rgba(5,218,144,.21) 47%,transparent 79%),
+    radial-gradient(ellipse 90% 85% at 48% -22%,rgba(236,255,246,.12),transparent 79%),
+    linear-gradient(170deg,rgba(12,30,30,.64),rgba(5,16,21,.75) 52%,rgba(6,31,27,.71)) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(165%);
+  backdrop-filter: blur(28px) saturate(165%);
+  box-shadow:
+    inset 0 3px 1px rgba(255,255,255,.64),
+    inset 0 7px 8px rgba(225,255,245,.16),
+    inset 2px 0 2px rgba(255,231,140,.48),
+    inset -2px 0 2px rgba(78,255,184,.54),
+    inset 0 -2px 1px rgba(164,255,194,.57),
+    inset 0 -8px 17px rgba(12,206,124,.18),
+    0 5px 0 rgba(2,13,14,.76),
+    0 16px 26px rgba(0,0,0,.45),
+    -13px 13px 25px rgba(241,177,26,.17),
+    15px 13px 28px rgba(12,230,148,.17) !important;
+  color: #f3fff8;
+  transition: box-shadow .52s var(--lg-ease),border-color .52s var(--lg-ease),transform .52s var(--lg-ease),background .52s var(--lg-ease);
+}
+
+/* Thin curved beam of light at the top of each glass surface. */
+header::before,
+#app .grid > .tile::before,
+#app .step::before,
+.safety::before,
+.call-notes::before,
+.call-helper-panel::before {
+  content: "";
+  display: block !important;
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  top: 1px;
+  left: 4%;
+  right: 4%;
+  height: 31%;
+  border-radius: 60% 60% 45% 45% / 32% 32% 65% 65%;
+  background: linear-gradient(180deg,rgba(255,255,255,.28),rgba(224,255,237,.075) 38%,transparent 100%);
+  opacity: .82;
+}
+header::after,
+#app .step::after,
+.safety::after,
+.call-notes::after,
+.call-helper-panel::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  top: 2px;
+  right: 7%;
+  width: 81px;
+  height: 12px;
+  transform: rotate(-13deg);
+  border-radius: 100%;
+  background: radial-gradient(ellipse,rgba(255,255,255,.98),rgba(239,255,250,.61) 34%,transparent 78%);
+  filter: blur(1.4px);
+}
+header > *, #app .step > *, .safety > *, .call-notes > *, .call-helper-panel > * { position:relative;z-index:2 }
+
+/* Main scenario cards should look like enlarged, curved glass buttons. */
+#app .grid > .tile {
+  min-height: 97px;
+  border-radius: 31px !important;
+  padding-top: 23px;
+  padding-bottom: 23px;
+  text-shadow: 0 1px 5px rgba(0,0,0,.74);
+}
+#app .grid > .tile::before { height: 45%;border-radius: 35% 35% 60% 60% }
+#app .grid > .tile:hover,
+#app .grid > .tile:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,.95) !important;
+  box-shadow:
+    inset 0 3px 2px #ffffffb8,inset 0 -3px 2px #55ffb2cf,
+    inset 2px 0 2px #ffe27e9c,inset -2px 0 2px #7bffd69c,
+    0 8px 0 #071313,0 20px 31px #0009,
+    -19px 18px 36px #f7c02b55,19px 18px 36px #05e7a355 !important;
+}
+#app .grid > .tile .tile-number {
+  border-radius: 15px;
+  background:linear-gradient(145deg,rgba(78,110,75,.82),rgba(21,77,62,.89));
+  box-shadow:inset 0 2px #ffffff70,inset 0 -2px #05251aaa,0 3px 12px #0007;
+  border:1px solid #e4ffe2a8;
+  color: #f6fff7;
+}
+#app .grid > .tile small { color:#d0e8d8 }
+
+/* Rounded, deep-glass choices: the closest analogue to the screenshot. */
+#app .step .choices .choice,
+#app .step .choices .choice:not(.active),
+#app > .back,
+.lang,
+.new-call,
+.safety-collapse,
+.call-notes button,
+.notes-actions button,
+#faq-assistant button,
+.quick-tool-body button,
+#app .faq-cats .choice {
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border:2px solid rgba(232,255,238,.78) !important;
+  border-radius:999px !important;
+  background:
+    radial-gradient(ellipse 78% 145% at -8% 116%,rgba(255,200,38,.67) 0%,rgba(211,169,38,.20) 54%,transparent 82%),
+    radial-gradient(ellipse 80% 148% at 110% 114%,rgba(1,249,154,.64) 0%,rgba(5,190,128,.20) 57%,transparent 83%),
+    linear-gradient(180deg,rgba(13,31,32,.83),rgba(3,17,21,.88) 54%,rgba(12,33,27,.84)) !important;
+  color:#f8fff9 !important;
+  text-shadow:0 2px 5px #000d;
+  -webkit-backdrop-filter:blur(24px) saturate(170%);
+  backdrop-filter:blur(24px) saturate(170%);
+  box-shadow:
+    inset 0 2px 1px rgba(255,255,255,.71),
+    inset 0 6px 8px rgba(245,255,250,.14),
+    inset 2px 0 1px rgba(255,233,156,.55),
+    inset -2px 0 1px rgba(95,255,195,.67),
+    inset 0 -3px 1px rgba(121,255,183,.62),
+    0 4px 0 #061515,
+    0 9px 15px #0008,
+    -8px 9px 19px rgba(255,187,26,.24),
+    9px 9px 19px rgba(0,224,149,.27) !important;
+  transition:transform .45s var(--lg-ease),box-shadow .5s var(--lg-ease),border-color .4s var(--lg-ease) !important;
+}
+#app .step .choices .choice::before,
+#app > .back::before,.lang::before,.new-call::before,
+.safety-collapse::before,.call-notes button::before,
+.notes-actions button::before,#faq-assistant button::before,
+.quick-tool-body button::before {
+  content:"";
+  display:block;
+  pointer-events:none;
+  position:absolute;
+  top:1px;left:8%;width:84%;height:45%;
+  border-radius:100% 100% 50% 50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.06) 70%,transparent);
+}
+#app .step .choices .choice:hover,
+#app > .back:hover,.lang:hover,.new-call:hover,
+.safety-collapse:hover,.call-notes button:hover,
+.quick-tool-body button:hover {
+  border-color:#fff !important;
+  transform:translateY(-2px);
+  box-shadow:
+    inset 0 3px 1px #ffffffcd,inset 0 -3px 1px #6affb3a9,
+    0 6px 0 #071717,0 12px 18px #0009,
+    -12px 14px 25px #ffca4861,12px 14px 25px #13ecaf61 !important;
+}
+#app .step .choices .choice.active,
+#app .faq-cats .choice.active {
+  background:linear-gradient(115deg,#f5d779 0%,#e0e3af 40%,#72eab8 100%) !important;
+  color:#103027 !important;
+  text-shadow:none;
+  border-color:#faffea !important;
+  box-shadow:inset 0 2px #fff,inset 0 -3px #37be8099,0 5px 14px #15d59755 !important;
+}
+#app .step .choices .choice.active::before {opacity:.68}
+
+/* Small floating utility pills match the same glass, including when expanded. */
+#quick-tools .quick-tool {
+  border:2px solid rgba(232,255,238,.8) !important;
+  border-radius:999px !important;
+  background:
+    radial-gradient(ellipse at 0% 114%,rgba(255,198,35,.73),transparent 67%),
+    radial-gradient(ellipse at 100% 117%,rgba(4,252,162,.71),transparent 72%),
+    linear-gradient(175deg,rgba(8,25,30,.81),rgba(5,16,20,.91)) !important;
+  box-shadow:inset 0 3px #ffffffb3,inset 0 -3px #4cffac9c,
+    inset 2px 0 #ffe29a96,inset -2px 0 #5effd294,
+    0 5px 0 #071719,0 12px 20px #0009,
+    -14px 13px 26px #ffbd3450,14px 13px 26px #0bffae50 !important;
+}
+#quick-tools .quick-tool[open] {border-radius:26px !important}
+#quick-tools .quick-tool::before {
+  inset:2px 6px auto;
+  height:45%;
+  background:linear-gradient(180deg,#ffffff65,#ffffff12 60%,transparent);
+}
+#quick-tools .quick-tool .quick-tool-body {
+  background:linear-gradient(145deg,rgba(4,17,18,.55),rgba(6,26,23,.69));
+  border-top:1px solid #ddffe350;
+}
+
+/* Legible input and FAQ copy on the very dark glass. */
+.call-notes textarea,#faq-assistant textarea {
+  background:rgba(4,17,19,.73) !important;
+  border:1.5px solid rgba(172,255,194,.59) !important;
+  box-shadow:inset 0 3px 10px #0009,inset 0 1px #ffffff1e;
+  border-radius:16px;
+  color:#f3fff7;
+}
+.safety-item.priority {background:rgba(64,38,23,.62) !important}
+.safety-item {background:rgba(12,34,29,.53) !important}
+#app .faq-item {border-radius:20px !important}
+#app .call-progress span.active {
+  background:linear-gradient(110deg,rgba(241,200,77,.8),rgba(65,222,158,.77)) !important;
+  color:#112b20 !important;
+}
+
+/* Keep the user's dark backdrop unchanged. The colour belongs to the glass. */
+@media(max-width:650px) {
+  #app .grid > .tile {border-radius:24px !important;min-height:86px}
+  #app .step,.call-notes,.safety,header {border-radius:22px !important}
+  #app .step .choices .choice {min-height:42px}
+  #quick-tools .quick-tool {box-shadow:inset 0 2px #ffffffaa,inset 0 -3px #70ffb099,0 5px 0 #071719,0 9px 15px #0009,-8px 9px 18px #ffbd3444,8px 9px 18px #0bffae44 !important}
+}
+@media(prefers-reduced-motion:reduce) {
+  header,#app .grid>.tile,#app .step,.safety,.call-notes,
+  #app .faq-item,.choice,.back,.lang,.new-call,
+  #quick-tools .quick-tool {transition:none !important}
+}
